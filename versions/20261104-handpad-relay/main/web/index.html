@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>夹爪画面 · RM P4</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans CJK SC",sans-serif;color:#f2f2f2;background:#000;font-synthesis:none}*{box-sizing:border-box}body{margin:0}main{height:100vh;height:100dvh;max-width:1200px;margin:auto;display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}header{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:17px;font-weight:600;margin:0}small{font-size:12px;color:#aaa}#state{font-size:13px;text-align:right;color:#bbb}#state[data-live="true"]{color:#a9d8bd}.camera{position:relative;overflow:hidden;min-height:180px;background:#111}canvas{width:100%;height:100%;object-fit:contain;display:block}.camera[data-stale="true"] canvas{opacity:.3}#notice{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;pointer-events:none}#notice[hidden]{display:none}#notice strong{font-size:20px;font-weight:600}footer{padding:12px 0 14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}.readings{display:flex;gap:24px;font-size:12px;color:#aaa}.readings b{display:block;color:#eee;font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;margin-bottom:3px}.actions{display:flex;gap:8px}button{min-height:44px;border:0;border-radius:22px;padding:0 18px;background:#2a2a2a;color:#eee;font:inherit;font-size:14px;cursor:pointer}button.primary{background:#fff;color:#000}button:focus-visible{outline:2px solid #fff;outline-offset:3px}#hint{flex-basis:100%;font-size:12px;color:#888;margin:0;line-height:1.5}@media(max-height:480px) and (orientation:landscape){header{min-height:40px}footer{padding:6px 0;gap:6px}#hint{display:none}.camera{min-height:100px}button{min-height:44px}}@media(max-width:400px){.readings{gap:16px}button{padding:0 14px}}
+</style>
+<main>
+ <header><div><h1>夹爪画面</h1><small>RM P4 · USB 摄像头</small></div><span id="state" role="status" aria-live="polite">正在连接</span></header>
+ <section class="camera" id="camera" data-stale="true" aria-label="摄像头画面"><canvas id="view" width="320" height="240"></canvas><div id="notice"><strong id="noticeTitle">正在等待画面</strong><small id="noticeText">请将 USB 摄像头接在 P4 板上</small></div></section>
+ <footer><div class="readings"><span><b id="fps">—</b>有效帧/秒</span><span><b id="age">—</b>设备帧龄</span></div><div class="actions"><button id="pause" aria-pressed="false">暂停画面</button><button id="fullscreen" class="primary">全屏</button></div><p id="hint">保持连接 RM-P4-Camera 热点，并在前台观看。暂停画面只停止手机取图。设备帧龄不是完整拍摄延迟。</p></footer>
+</main>
+<script>
+'use strict';
+const camera=document.querySelector('#camera'),canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),state=document.querySelector('#state'),notice=document.querySelector('#notice'),title=document.querySelector('#noticeTitle'),text=document.querySelector('#noticeText'),pause=document.querySelector('#pause');
+let active=true,generation=0,seq=-1,boot='',lastDraw=0,controller=null,count=0,rateStart=performance.now();
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function message(label,heading,detail){state.textContent=label;state.dataset.live='false';camera.dataset.stale='true';notice.hidden=false;title.textContent=heading;text.textContent=detail;}
+async function receive(myGeneration){
+ while(active&&myGeneration===generation){
+  const currentController=new AbortController();controller=currentController;const started=performance.now();const timeout=setTimeout(()=>currentController.abort(),250);let bitmap=null;
+  try{
+   const response=await fetch('/frame.jpg?after='+seq,{cache:'no-store',signal:currentController.signal});
+   if(response.status===204){await sleep(20);continue;}
+   if(response.status===503){if(!lastDraw)message('等待摄像头','正在等待画面','请检查摄像头是否已接在 P4 上');await sleep(100);continue;}
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const incomingBoot=response.headers.get('X-Boot-Id')||'';
+   const incomingSeq=Number(response.headers.get('X-Frame-Seq'));
+   const deviceAge=Number(response.headers.get('X-Frame-Age-Ms'));
+   const blob=await response.blob();bitmap=await createImageBitmap(blob);
+   if(!active||myGeneration!==generation)continue;
+   if(incomingBoot!==boot){boot=incomingBoot;seq=-1;}
+   const ageUpper=deviceAge+performance.now()-started;
+   if(!Number.isFinite(incomingSeq)||incomingSeq===seq||!Number.isFinite(ageUpper)||ageUpper>300)continue;
+   ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);seq=incomingSeq;lastDraw=performance.now();count++;
+   state.textContent='实时画面';state.dataset.live='true';camera.dataset.stale='false';notice.hidden=true;
+   document.querySelector('#age').textContent=Math.round(ageUpper)+' ms';
+  }catch(error){if(active&&myGeneration===generation&&!lastDraw)message('正在重连','连接中断','确认手机仍连接 RM-P4-Camera 热点');await sleep(120);}
+  finally{clearTimeout(timeout);if(bitmap)bitmap.close();}
+ }
+}
+setInterval(()=>{
+ const now=performance.now();if(now-rateStart>=1000){document.querySelector('#fps').textContent=(count*1000/(now-rateStart)).toFixed(1);count=0;rateStart=now;}
+ if(active&&lastDraw&&now-lastDraw>350)message('画面已过期','画面已过期','正在等待最新画面，请勿按旧画面判断夹持状态');
+},100);
+pause.addEventListener('click',()=>{active=!active;generation++;if(controller)controller.abort();pause.textContent=active?'暂停画面':'继续画面';pause.setAttribute('aria-pressed',String(!active));if(active){seq=-1;lastDraw=0;message('正在连接','正在恢复画面','只显示收到的最新帧');receive(generation);}else message('已暂停','画面已暂停','板端识别继续运行');});
+document.querySelector('#fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(error){document.querySelector('#hint').textContent='浏览器未允许全屏，可以横屏查看。';}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){generation++;if(controller)controller.abort();}else if(active){generation++;seq=-1;lastDraw=0;receive(generation);}});
+receive(generation);
+</script>
+</html>
