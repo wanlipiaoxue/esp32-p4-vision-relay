@@ -1,0 +1,50 @@
+[
+  {
+    "path": "CMakeLists.txt",
+    "source_sha256": "be47e68271bf447379831916198e8e823fa8816e518d313303f2c91b319faaa6",
+    "published_sha256": "be47e68271bf447379831916198e8e823fa8816e518d313303f2c91b319faaa6",
+    "changes": []
+  },
+  {
+    "path": "dependencies.lock",
+    "source_sha256": "a429b3aeef78c8a2bbd40f12830f964b497a50e3f69a9d67beccb1b58f4c786d",
+    "published_sha256": "a429b3aeef78c8a2bbd40f12830f964b497a50e3f69a9d67beccb1b58f4c786d",
+    "changes": []
+  },
+  {
+    "path": "sdkconfig",
+    "source_sha256": "1204af10160e180a881d46169109ba9ee73ba4e6f11e4a145b006b1d39af907b",
+    "published_sha256": "1204af10160e180a881d46169109ba9ee73ba4e6f11e4a145b006b1d39af907b",
+    "changes": []
+  },
+  {
+    "path": "sdkconfig.defaults",
+    "source_sha256": "05b8d499147cbcbb33e977ed47533919d30fae3d9fcdd5dd5014c82eed03240c",
+    "published_sha256": "05b8d499147cbcbb33e977ed47533919d30fae3d9fcdd5dd5014c82eed03240c",
+    "changes": []
+  },
+  {
+    "path": "main/CMakeLists.txt",
+    "source_sha256": "9d53ac7929437ada30af61e92a8d20a3d4dfbfeac737d8df7fbc138dc6405dfe",
+    "published_sha256": "9d53ac7929437ada30af61e92a8d20a3d4dfbfeac737d8df7fbc138dc6405dfe",
+    "changes": []
+  },
+  {
+    "path": "main/idf_component.yml",
+    "source_sha256": "790358354a91dfc849592b2944e41796b0d63f214baeef67e26f1b8233d7713b",
+    "published_sha256": "790358354a91dfc849592b2944e41796b0d63f214baeef67e26f1b8233d7713b",
+    "changes": []
+  },
+  {
+    "path": "main/speaker_test.c",
+    "source_sha256": "b99b865d2e84398465f0edf792e8b6c43aa5a9aca10bdba557ccbbd9340843f7",
+    "published_sha256": "b99b865d2e84398465f0edf792e8b6c43aa5a9aca10bdba557ccbbd9340843f7",
+    "changes": []
+  },
+  {
+    "path": "docs/SOURCE_SNAPSHOT_README.md",
+    "source_sha256": "b430427b16b909bbcb3e4c2039e471eb22e2ede70c23971a00d6e81f1c1324fd",
+    "published_sha256": "b430427b16b909bbcb3e4c2039e471eb22e2ede70c23971a00d6e81f1c1324fd",
+    "changes": []
+  }
+]
