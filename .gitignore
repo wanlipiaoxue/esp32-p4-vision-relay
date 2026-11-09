@@ -1,0 +1,22 @@
+.DS_Store
+Thumbs.db
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+*.pem
+*.pfx
+*.key
+**/build/
+**/managed_components/
+**/tests/out/
+*.log
+*.elf
+*.map
+*.bin
+
+# Original browser harnesses depend on private local tooling.
+**/tests/browser_preview.mjs
+**/tests/serve_preview.mjs
+**/tests/browser_cplus.mjs
