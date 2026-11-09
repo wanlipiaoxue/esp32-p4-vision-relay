@@ -1,0 +1,44 @@
+[
+  {
+    "path": "CMakeLists.txt",
+    "source_sha256": "49af6567ee0b9c381654ad42f7ea0c40fe61a8ca0d9421625faa01ca21603009",
+    "published_sha256": "49af6567ee0b9c381654ad42f7ea0c40fe61a8ca0d9421625faa01ca21603009",
+    "changes": []
+  },
+  {
+    "path": "pytest_hello_world.py",
+    "source_sha256": "2f7eb8e66534c38107095b0bf9e0ad4c40097c22a590212cbaf07a6d9693e76a",
+    "published_sha256": "2f7eb8e66534c38107095b0bf9e0ad4c40097c22a590212cbaf07a6d9693e76a",
+    "changes": []
+  },
+  {
+    "path": "sdkconfig",
+    "source_sha256": "9258ecee9fbcf63f10e99e19ef725eed665f93dad381e8e808d4bda6c6e6794c",
+    "published_sha256": "9258ecee9fbcf63f10e99e19ef725eed665f93dad381e8e808d4bda6c6e6794c",
+    "changes": []
+  },
+  {
+    "path": "sdkconfig.ci",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "changes": []
+  },
+  {
+    "path": "main/CMakeLists.txt",
+    "source_sha256": "116b04da44200b6ddeee8aed45c9fbfb5e487d727c7d29b028e79807e76137cc",
+    "published_sha256": "116b04da44200b6ddeee8aed45c9fbfb5e487d727c7d29b028e79807e76137cc",
+    "changes": []
+  },
+  {
+    "path": "main/hello_world_main.c",
+    "source_sha256": "b2d1c8573307e010d276d2d0df537f1fe752416f8422e267aa8b1661c1744595",
+    "published_sha256": "b2d1c8573307e010d276d2d0df537f1fe752416f8422e267aa8b1661c1744595",
+    "changes": []
+  },
+  {
+    "path": "docs/SOURCE_SNAPSHOT_README.md",
+    "source_sha256": "ff3d88ffac063e7e90e6cca9acaef101da29b2c22a60687b1af87b3d4cf8342b",
+    "published_sha256": "ff3d88ffac063e7e90e6cca9acaef101da29b2c22a60687b1af87b3d4cf8342b",
+    "changes": []
+  }
+]
