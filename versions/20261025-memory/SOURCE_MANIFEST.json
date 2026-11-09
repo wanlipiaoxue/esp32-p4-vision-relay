@@ -1,0 +1,62 @@
+[
+  {
+    "path": "config/esp32p4_local_defaults.cmake",
+    "source_sha256": "b92bea4da55bac9c41b246ed0dc736bbb3a8f74b7e38bfa73ce5cb365ae3a543",
+    "published_sha256": "b92bea4da55bac9c41b246ed0dc736bbb3a8f74b7e38bfa73ce5cb365ae3a543",
+    "changes": []
+  },
+  {
+    "path": "config/esp32p4_rev1_3.defaults",
+    "source_sha256": "c5718ca0239450b5114ac06d7dac40ef2663262ce9093f25abb36a1337d5233f",
+    "published_sha256": "c5718ca0239450b5114ac06d7dac40ef2663262ce9093f25abb36a1337d5233f",
+    "changes": []
+  },
+  {
+    "path": "config/esp32p4_rev3_x.defaults",
+    "source_sha256": "441f9c9f4b2f82f230f2dd83cb4617b0589992e6a8d482f6958cdccb3ac802b7",
+    "published_sha256": "441f9c9f4b2f82f230f2dd83cb4617b0589992e6a8d482f6958cdccb3ac802b7",
+    "changes": []
+  },
+  {
+    "path": "examples/esp-idf/00_board_check/CMakeLists.txt",
+    "source_sha256": "2bed246e0eeec8adeaf8f2cb4277c7dd8825342de2e1b7b98c44e526fc900032",
+    "published_sha256": "2bed246e0eeec8adeaf8f2cb4277c7dd8825342de2e1b7b98c44e526fc900032",
+    "changes": []
+  },
+  {
+    "path": "examples/esp-idf/00_board_check/README.md",
+    "source_sha256": "76236571efec21e8273d31f8506fd87f643ab3ad49da72b728a3dc774756c082",
+    "published_sha256": "76236571efec21e8273d31f8506fd87f643ab3ad49da72b728a3dc774756c082",
+    "changes": []
+  },
+  {
+    "path": "examples/esp-idf/00_board_check/README_CN.md",
+    "source_sha256": "b66f620b53f9f48bb1d4f53b76fe84398d1af841b0acfb347ae17097632bfe9e",
+    "published_sha256": "b66f620b53f9f48bb1d4f53b76fe84398d1af841b0acfb347ae17097632bfe9e",
+    "changes": []
+  },
+  {
+    "path": "examples/esp-idf/00_board_check/sdkconfig",
+    "source_sha256": "cf882f7c176e5a9fe10b0a5ad31e2463f87615411fbdc24f018a728ee7366f08",
+    "published_sha256": "cf882f7c176e5a9fe10b0a5ad31e2463f87615411fbdc24f018a728ee7366f08",
+    "changes": []
+  },
+  {
+    "path": "examples/esp-idf/00_board_check/sdkconfig.defaults",
+    "source_sha256": "73487a15a074a05b1737d6d249bd2b8eecf609baa23a75db7788a8b5ef08e6e7",
+    "published_sha256": "73487a15a074a05b1737d6d249bd2b8eecf609baa23a75db7788a8b5ef08e6e7",
+    "changes": []
+  },
+  {
+    "path": "examples/esp-idf/00_board_check/main/board_check_main.c",
+    "source_sha256": "5d91b0b3b4fad6034846c24c4950096c762ac13ecf6b1b15a1a655cb9dd469a8",
+    "published_sha256": "5d91b0b3b4fad6034846c24c4950096c762ac13ecf6b1b15a1a655cb9dd469a8",
+    "changes": []
+  },
+  {
+    "path": "examples/esp-idf/00_board_check/main/CMakeLists.txt",
+    "source_sha256": "47169eadd497faacbea479046ee10623f83872fee1fe17c3df6ac9fec3224103",
+    "published_sha256": "47169eadd497faacbea479046ee10623f83872fee1fe17c3df6ac9fec3224103",
+    "changes": []
+  }
+]
