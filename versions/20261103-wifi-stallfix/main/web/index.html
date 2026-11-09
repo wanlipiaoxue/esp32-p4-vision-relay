@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>夹爪画面 · RM P4</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans CJK SC",sans-serif;color:#f2f2f2;background:#000;font-synthesis:none}*{box-sizing:border-box}body{margin:0}main{height:100vh;height:100dvh;max-width:1200px;margin:auto;display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}header{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:17px;font-weight:600;margin:0}small{font-size:12px;color:#aaa}#state{font-size:13px;text-align:right;color:#bbb}#state[data-live="true"]{color:#a9d8bd}.camera{position:relative;overflow:hidden;min-height:180px;background:#111}canvas{width:100%;height:100%;object-fit:contain;display:block}.camera[data-stale="true"] canvas{opacity:.3}#notice{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;pointer-events:none}#notice[hidden]{display:none}#notice strong{font-size:20px;font-weight:600}footer{padding:12px 0 14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}.readings{display:flex;gap:24px;font-size:12px;color:#aaa}.readings b{display:block;color:#eee;font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;margin-bottom:3px}.actions{display:flex;gap:8px}button{min-height:44px;border:0;border-radius:22px;padding:0 18px;background:#2a2a2a;color:#eee;font:inherit;font-size:14px;cursor:pointer}button.primary{background:#fff;color:#000}button:focus-visible{outline:2px solid #fff;outline-offset:3px}#hint{flex-basis:100%;font-size:12px;color:#888;margin:0;line-height:1.5}@media(max-height:480px) and (orientation:landscape){header{min-height:40px}footer{padding:6px 0;gap:6px}#hint{display:none}.camera{min-height:100px}button{min-height:44px}}@media(max-width:400px){.readings{gap:16px}button{padding:0 14px}}
+.diagnostics{flex-basis:100%;font-size:12px;color:#aaa}.diagnostics summary{cursor:pointer;min-height:44px;display:flex;align-items:center}.diagnostics pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6}
+</style>
+<main>
+ <header><div><h1>夹爪画面</h1><small>RM P4 · USB 摄像头</small></div><span id="state" role="status" aria-live="polite">正在连接</span></header>
+ <section class="camera" id="camera" data-stale="true" aria-label="摄像头画面"><canvas id="view" width="320" height="240"></canvas><div id="notice"><strong id="noticeTitle">正在等待画面</strong><small id="noticeText">请将 USB 摄像头接在 P4 板上</small></div></section>
+ <footer><div class="readings"><span><b id="fps">—</b>有效帧/秒</span><span><b id="age">—</b>帧龄估计</span></div><div class="actions"><button id="pause" aria-pressed="false">暂停画面</button><button id="fullscreen" class="primary">全屏</button></div><p id="hint">保持连接 RM-P4-Camera 热点，并在前台观看。暂停画面只停止手机取图。帧龄估计包含请求耗时，不是完整拍摄延迟。</p><details class="diagnostics" id="diagnosticPanel"><summary>查看连接信息</summary><pre id="diagnosticText">展开后在画面继续播放时统计，每2秒更新。</pre></details></footer>
+</main>
+<script>
+'use strict';
+const camera=document.querySelector('#camera'),canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),state=document.querySelector('#state'),notice=document.querySelector('#notice'),title=document.querySelector('#noticeTitle'),text=document.querySelector('#noticeText'),pause=document.querySelector('#pause');
+let active=true,generation=0,seq=-1,boot='',lastDraw=0,controller=null,count=0,rateStart=performance.now(),failures=0;
+// A request deadline limits connection stalls; it does not relax frame freshness.
+const REQUEST_TIMEOUT_MS=600,MAX_FRAME_AGE_MS=300,STALE_AFTER_MS=350;
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const diagnosticPanel=document.querySelector('#diagnosticPanel'),diagnosticText=document.querySelector('#diagnosticText');
+let diagnosticController=null,diagnosticPrevious=null;
+async function refreshDiagnostics(){
+ if(!diagnosticPanel.open||document.hidden||diagnosticController)return;
+ if(!active){diagnosticPrevious=null;diagnosticText.textContent='画面已暂停，连接统计暂停。';return;}
+ const request=new AbortController();diagnosticController=request;const timeout=setTimeout(()=>request.abort(),800);
+ try{
+  const response=await fetch('/status',{cache:'no-store',signal:request.signal});
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  const data=await response.json(),now=performance.now();
+  if(!diagnosticPanel.open||document.hidden||!active)return;
+  if(!data.boot_id||!Number.isFinite(data.received)||!Number.isFinite(data.sent))throw new Error('Missing diagnostics');
+  let rate='正在统计输入、编码和发送帧率…';
+  if(diagnosticPrevious&&diagnosticPrevious.data.boot_id===data.boot_id){
+   const seconds=(now-diagnosticPrevious.now)/1000;
+   const fps=key=>Math.max(0,(data[key]-diagnosticPrevious.data[key])/seconds).toFixed(1);
+   rate='输入 '+fps('received')+' 帧/秒 · 编码 '+fps('encoded')+' 帧/秒 · 发出 '+fps('sent')+' 帧/秒';
+  }
+  diagnosticPrevious={data,now};
+  diagnosticText.textContent=rate+'\n最近编码 '+data.last_encode_ms+' ms · 最近发送 '+data.last_send_ms+' ms\n丢弃累计 '+data.dropped+' · 编码错误 '+data.encode_errors+' · 发送错误 '+data.send_errors+'\n链路故障标志：'+(data.transport_failed?'有':'无')+'。发送耗时不等于手机接收耗时。';
+ }catch(error){if(diagnosticPanel.open&&!document.hidden&&active){diagnosticPrevious=null;diagnosticText.textContent='暂未取得连接信息，正在重试。画面接收继续运行。';}}
+ finally{clearTimeout(timeout);if(diagnosticController===request)diagnosticController=null;}
+}
+diagnosticPanel.addEventListener('toggle',()=>{diagnosticPrevious=null;if(diagnosticPanel.open)refreshDiagnostics();else if(diagnosticController)diagnosticController.abort();});
+document.addEventListener('visibilitychange',()=>{diagnosticPrevious=null;if(document.hidden&&diagnosticController)diagnosticController.abort();});
+setInterval(refreshDiagnostics,2000);
+function message(label,heading,detail){state.textContent=label;state.dataset.live='false';camera.dataset.stale='true';notice.hidden=false;title.textContent=heading;text.textContent=detail;}
+async function receive(myGeneration){
+ while(active&&myGeneration===generation){
+  const currentController=new AbortController();controller=currentController;const started=performance.now();const timeout=setTimeout(()=>currentController.abort(),REQUEST_TIMEOUT_MS);let bitmap=null;
+  try{
+   const response=await fetch('/frame.jpg?after='+seq,{cache:'no-store',signal:currentController.signal});
+   if(response.status===204){failures=0;await sleep(20);continue;}
+   if(response.status===503){failures=0;if(!lastDraw)message('等待图传','图传暂不可用','正在重新取图，请确认板卡和摄像头正常连接');await sleep(40);continue;}
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const incomingBoot=response.headers.get('X-Boot-Id'),sequenceHeader=response.headers.get('X-Frame-Seq'),ageHeader=response.headers.get('X-Frame-Age-Ms');
+   const incomingSeq=Number(sequenceHeader),deviceAge=Number(ageHeader);
+   if(!incomingBoot||sequenceHeader===null||ageHeader===null||!Number.isInteger(incomingSeq)||incomingSeq<0||!Number.isFinite(deviceAge)||deviceAge<0)throw new Error('Invalid frame metadata');
+   const blob=await response.blob();clearTimeout(timeout);
+   if(!active||myGeneration!==generation||document.hidden)continue;
+   if(incomingBoot!==boot){boot=incomingBoot;seq=-1;}
+   if(incomingSeq<=seq)continue;
+   // Advance the receive cursor even when late: never download the same stale JPEG again.
+   seq=incomingSeq;failures=0;
+   if(deviceAge+performance.now()-started>MAX_FRAME_AGE_MS)continue;
+   bitmap=await createImageBitmap(blob);
+   if(!active||myGeneration!==generation||document.hidden)continue;
+   const ageUpper=deviceAge+performance.now()-started;
+   if(ageUpper>MAX_FRAME_AGE_MS)continue;
+   ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);lastDraw=performance.now();count++;
+   state.textContent='实时画面';state.dataset.live='true';camera.dataset.stale='false';notice.hidden=true;
+   document.querySelector('#age').textContent=Math.round(ageUpper)+' ms';
+  }catch(error){if(!active||myGeneration!==generation||document.hidden)break;if(!lastDraw)message('正在重连','连接中断','确认手机仍连接 RM-P4-Camera 热点');failures=Math.min(failures+1,4);await sleep(Math.min(20*2**(failures-1),160));}
+  finally{clearTimeout(timeout);if(controller===currentController)controller=null;if(bitmap)bitmap.close();}
+ }
+}
+setInterval(()=>{
+ const now=performance.now();if(now-rateStart>=1000){document.querySelector('#fps').textContent=(count*1000/(now-rateStart)).toFixed(1);count=0;rateStart=now;}
+ if(active&&!document.hidden&&lastDraw&&now-lastDraw>STALE_AFTER_MS)message('画面已过期','画面已过期','正在等待最新画面，请勿按旧画面判断夹持状态');
+},100);
+pause.addEventListener('click',()=>{active=!active;generation++;if(controller)controller.abort();pause.textContent=active?'暂停画面':'继续画面';pause.setAttribute('aria-pressed',String(!active));if(active){seq=-1;lastDraw=0;message('正在连接','正在恢复画面','只显示收到的最新帧');receive(generation);}else message('已暂停','画面已暂停','板端识别继续运行');});
+document.querySelector('#fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(error){document.querySelector('#hint').textContent='浏览器未允许全屏，可以横屏查看。';}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){generation++;if(controller)controller.abort();}else if(active){generation++;seq=-1;lastDraw=0;receive(generation);}});
+receive(generation);
+</script>
+</html>
