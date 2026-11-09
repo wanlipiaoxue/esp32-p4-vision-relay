@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>夹爪画面 · RM P4</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans CJK SC",sans-serif;color:#f2f2f2;background:#000;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}
+/* One viewer: 16px shared edges, three equal lamp columns; no navigation destinations. */
+main{height:100vh;height:100dvh;min-height:480px;max-width:1200px;margin:auto;display:grid;grid-template-rows:auto auto minmax(180px,1fr) auto;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+header{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-size:20px;font-weight:600;margin:0}small{font-size:13px;color:#b4b4b4}
+#state{font-size:13px;text-align:right;color:#b4b4b4;white-space:nowrap}#state[data-live="true"]{color:#b4b4b4}
+#lamps{padding:8px 0 12px}#lampHeading{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;font-size:13px;color:#b4b4b4}#lampHeading h2{font:inherit;margin:0}#lampMeta{font-size:13px;color:#949494}
+.lamp-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.lamp{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:8px;min-width:0}.lamp-name{font-size:14px;font-weight:500}.lamp-state{display:block;font-size:13px;color:#b4b4b4;margin-top:3px;white-space:nowrap}.multiplier{font-size:13px;color:#b4b4b4;font-variant-numeric:tabular-nums}.dot{width:10px;height:10px;border-radius:50%;background:#232323;border:1px solid #777}.lamp[data-state="1"] .dot,.lamp[data-state="2"] .dot,.lamp[data-state="3"] .dot{background:var(--lamp-color);border-color:var(--lamp-color)}
+.lamp[data-state="2"] .dot{animation:lamp-switch .2s steps(1,end) infinite}.lamp[data-state="3"] .dot{animation:lamp-switch 1s steps(1,end) infinite}
+@keyframes lamp-switch{0%,49.99%{opacity:1}50%,100%{opacity:.25}}
+#lamps[data-fresh="false"] .dot{animation:none;background:#232323;border-color:#777;opacity:1}
+@media(prefers-reduced-motion:reduce){.lamp[data-state] .dot{animation:none}}
+.camera{position:relative;overflow:hidden;min-height:180px;background:#111}canvas{width:100%;height:100%;object-fit:contain;display:block}
+#notice{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;pointer-events:none}#notice[hidden]{display:none}#notice strong{font-size:20px;font-weight:600}
+footer{padding:12px 0 14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}.readings{display:flex;gap:24px;font-size:13px;color:#b4b4b4}.readings b{display:block;color:#eee;font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;margin-bottom:3px}.actions{display:flex;gap:8px}button{min-height:44px;border:0;border-radius:22px;padding:0 18px;background:#2a2a2a;color:#eee;font:inherit;font-size:14px;cursor:pointer}button.primary{background:#fff;color:#000}button:focus-visible,summary:focus-visible{outline:2px solid #fff;outline-offset:3px}
+#hint{flex-basis:100%;font-size:13px;color:#949494;margin:0;line-height:1.5}.diagnostics{flex-basis:100%;font-size:13px;color:#b4b4b4}.diagnostics summary{cursor:pointer;min-height:44px;display:flex;align-items:center}.diagnostics pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6;font-variant-numeric:tabular-nums}
+@media(max-width:400px){.readings{gap:16px}button{padding:0 14px}.lamp-list{gap:10px}.lamp{gap:6px;grid-template-columns:10px minmax(0,1fr)}.multiplier{grid-column:2;grid-row:2;margin-top:0}.lamp-state{font-size:13px}}
+@media(max-height:480px) and (orientation:landscape){main{min-height:360px;grid-template-rows:auto auto minmax(100px,1fr) auto}header{min-height:40px}#lamps{padding:3px 0 8px}#lampHeading{margin-bottom:4px}.lamp-state{display:inline;margin:0 0 0 8px}.camera{min-height:100px}footer{padding:6px 0;gap:6px}#hint{display:none}.diagnostics summary{min-height:44px}}
+</style>
+<main>
+ <header><div><h1>夹爪画面</h1><small>RM P4 · USB 摄像头</small></div><span id="state" role="status" aria-live="polite">正在连接</span></header>
+ <section id="lamps" data-fresh="false" aria-labelledby="lampTitle">
+  <div id="lampHeading"><h2 id="lampTitle">灯控状态</h2><span id="lampMeta" role="status">等待连接</span></div>
+  <div class="lamp-list">
+   <div class="lamp" id="lamp-red" data-state="unknown" style="--lamp-color:#f07973"><i class="dot" aria-hidden="true"></i><span class="lamp-name">红灯<span class="lamp-state">未知</span></span><span class="multiplier">—</span></div>
+   <div class="lamp" id="lamp-green" data-state="unknown" style="--lamp-color:#6dd09a"><i class="dot" aria-hidden="true"></i><span class="lamp-name">绿灯<span class="lamp-state">未知</span></span><span class="multiplier">—</span></div>
+   <div class="lamp" id="lamp-blue" data-state="unknown" style="--lamp-color:#7db4f5"><i class="dot" aria-hidden="true"></i><span class="lamp-name">蓝灯<span class="lamp-state">未知</span></span><span class="multiplier">—</span></div>
+  </div>
+ </section>
+ <section class="camera" id="camera" data-stale="true" aria-label="摄像头画面"><canvas id="view" width="320" height="240"></canvas><div id="notice"><strong id="noticeTitle">正在等待画面</strong><small id="noticeText">请将 USB 摄像头接在 P4 板上</small></div></section>
+ <footer>
+  <div class="readings"><span><b id="fps">—</b>有效帧/秒</span><span><b id="age">—</b>帧龄估计</span></div>
+  <div class="actions"><button id="pause" aria-pressed="false">暂停画面</button><button id="fullscreen" class="primary">全屏</button></div>
+  <p id="hint">保持连接 RM-P4-Camera 热点，并在前台观看。暂停画面时，灯控状态继续更新。帧龄估计包含请求耗时，不是完整拍摄延迟。</p>
+  <details class="diagnostics" id="diagnosticPanel"><summary>查看连接信息</summary><pre id="diagnosticText">展开后显示板端输入、编码与发送统计。</pre></details>
+ </footer>
+</main>
+<script src="/preview.js" defer></script>
+</html>
