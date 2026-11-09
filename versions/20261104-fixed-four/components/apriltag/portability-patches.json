@@ -1,0 +1,79 @@
+[
+  {
+    "file": "apriltag.c",
+    "change": "Explicit int cast for int32_t image dimensions in printf calls"
+  },
+  {
+    "file": "apriltag_quad_thresh.c",
+    "change": "Explicit int cast for int32_t image dimensions in printf calls"
+  },
+  {
+    "file": "common/image_u8.c",
+    "change": "Explicit int cast for int32_t image dimensions in printf calls"
+  },
+  {
+    "file": "common/image_u8x3.c",
+    "change": "Explicit int cast for int32_t image dimensions in printf calls"
+  },
+  {
+    "file": "common/image_u8x4.c",
+    "change": "Explicit int cast for int32_t image dimensions in printf calls"
+  },
+  {
+    "file": "common/postscript_utils.h",
+    "change": "Explicit int cast for int32_t image dimensions in printf calls"
+  },
+  {
+    "file": "common/string_util.h",
+    "replacements": [
+      [
+        "islower(str1[i])",
+        "islower((unsigned char)str1[i])"
+      ],
+      [
+        "isupper(str1[i])",
+        "isupper((unsigned char)str1[i])"
+      ]
+    ]
+  },
+  {
+    "file": "common/string_util.c",
+    "replacements": [
+      [
+        "isspace(*ptr)",
+        "isspace((unsigned char)*ptr)"
+      ]
+    ]
+  },
+  {
+    "file": "common/getopt.c",
+    "replacements": [
+      [
+        "isdigit(tok[pos])",
+        "isdigit((unsigned char)tok[pos])"
+      ]
+    ]
+  },
+  {
+    "file": "common/pjpeg.c",
+    "replacements": [
+      [
+        "marker, marker_offset);",
+        "marker, (unsigned)marker_offset);"
+      ]
+    ]
+  },
+  {
+    "file": "common/pjpeg-idct.c",
+    "replacements": [
+      [
+        "njRowIDCT(int* blk)",
+        "njRowIDCT(int32_t* blk)"
+      ],
+      [
+        "njColIDCT(const int* blk",
+        "njColIDCT(const int32_t* blk"
+      ]
+    ]
+  }
+]

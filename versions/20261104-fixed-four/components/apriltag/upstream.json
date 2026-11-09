@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/AprilRobotics/apriltag",
+  "commit": "b7c0ebe9aa20f82ec7a828579004f9e706bfecd9",
+  "archive_bytes": 1903294,
+  "archive_sha256": "637CDA5D390FB57B7881FA5BD8DC4785CA3821CB28077C9C901B1C05387F141F",
+  "baseline": "C:\\Espressif\\projects\\rm-p4-uvc-20261025\\baseline-before-tag-20261025-161522"
+}
